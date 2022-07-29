@@ -21,7 +21,6 @@
 //
 //***------- user Libraries ----***//
 //
-#include "commandData.h"
 #include "plottingwindow.h"
 #include "qcustomplot.h"
 //

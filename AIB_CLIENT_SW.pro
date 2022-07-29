@@ -12,7 +12,7 @@ QT      += widgets printsupport
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 
-TARGET = AIB_SW_TEST_V2
+TARGET = AIB_ClIENT_SW
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use

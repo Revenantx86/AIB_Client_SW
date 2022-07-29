@@ -4,7 +4,6 @@
 #include "treeviewcommands.cpp"
 #include <QHostAddress>
 
-#include "definitions.h"
 #include <QtWidgets/QFileDialog>
 
 #include "handleCommand.cpp"
