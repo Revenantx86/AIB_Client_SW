@@ -197,7 +197,7 @@ void MainWindow::onReadyRead() // triggers when byte received
 {
     /*
      * Qt incoming data structre for reqular client - server comm
-     *      QBytreArray = <Time Stamp> + <Sequence Number> + <Keyword>
+     *      QBytreArray = <Time Stamp> + <Time Stamp> + <Sequence Number> + <Keyword>
      *
      * Qt incoming data structure for change in property
      *      QBtreArray = <Time Stamp> + <Time Stamp> + <sequence number> + note +  <property> + <value>
@@ -210,10 +210,7 @@ void MainWindow::onReadyRead() // triggers when byte received
     displayMessageConsole(rawData, "blue");
     //
     //
-    if (datas.size() <= 3 || rawData == "Succesfully Connected to Host \r\n") // if answer is regular
-    {
-    }
-    else // else if answer for changed event
+    if (datas.size() > 4 && rawData != "Succesfully Connected to Host \r\n") // Check if
     {
         handleCommand(rawData, ui);
         addData_tableView(datas);
@@ -224,6 +221,16 @@ void MainWindow::onReadyRead() // triggers when byte received
             temperaturePlots[i]->updatePlot();
         }
     }
+
+    /*
+    if (datas.size() <= 3 || rawData == "Succesfully Connected to Host \r\n") // if answer is regular
+    {
+    }
+    else // else if answer for changed event
+    {
+
+    }
+    */
 }
 //
 // *** Method for sending bytes to TCP Socket ***//
@@ -493,13 +500,6 @@ void MainWindow::on_Command_Import_pushButton_clicked()
 
 void MainWindow::on_Connect_pushButton_clicked() // Connect to the serial device if not successfull display error
 {
-}
-
-void MainWindow::on_pushButton_clicked()
-{
-    PlottingWindow *newWidget = new PlottingWindow(Data_tablewView_ItemModel, Properties_tableView_ItemModel, "de1.temp", nullptr);
-    newWidget->show();
-    temperaturePlots.append(newWidget);
 }
 
 void MainWindow::on_Data_tableView_doubleClicked(const QModelIndex &index)
