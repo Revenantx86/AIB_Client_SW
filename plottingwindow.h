@@ -45,6 +45,7 @@ public:
     // ***  Properties list View Functions  *** //
     void setupProperties_ListView();
     bool checkPropertyExistOnListView(QString property); // check property already exists on the list view
+    bool checkPropertyExistOnArray(QString property);
     // Continious data adding
     void updatePlot();
 
