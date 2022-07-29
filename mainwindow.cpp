@@ -498,10 +498,6 @@ void MainWindow::on_Command_Import_pushButton_clicked()
     }
 }
 
-void MainWindow::on_Connect_pushButton_clicked() // Connect to the serial device if not successfull display error
-{
-}
-
 void MainWindow::on_Data_tableView_doubleClicked(const QModelIndex &index)
 {
     QString targetName = Data_tablewView_ItemModel->itemFromIndex(index)->text();

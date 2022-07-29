@@ -92,7 +92,6 @@ private slots:
     /*
      */
 
-    void on_Connect_pushButton_clicked();
     void on_ConsoleSend_pushButton_clicked();
     void on_Commands_treeView_doubleClicked(const QModelIndex &index);
     void on_Command_Import_pushButton_clicked();
