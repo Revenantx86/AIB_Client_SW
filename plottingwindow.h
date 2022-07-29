@@ -7,6 +7,7 @@
 #include <QString>
 #include <QColor>
 #include "qcustomplot.h"
+#include <QInputDialog>
 
 // ->  data structure for the plot
 struct dataStruct
@@ -38,9 +39,7 @@ public:
     ~PlottingWindow();
 
     void setup();
-    void startPlot();
     void setupPlot();
-
     void setupSettings();
 
     // ***  Properties list View Functions  *** //
@@ -55,6 +54,12 @@ private slots:
     void on_addProperty_pushButton_clicked();
 
     void on_properties_listView_clicked(const QModelIndex &index);
+
+    //  *** On Graph Control Functions  ***   //
+    void contextMenuRequest(QPoint pos); // menu
+    void moveLegend();                   // moving legend
+
+    void on_properties_listView_activated(const QModelIndex &index);
 
 private:
     Ui::PlottingWindow *ui;
