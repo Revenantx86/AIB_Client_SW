@@ -109,9 +109,9 @@ bool PlottingWindow::checkPropertyExistOnListView(QString property)
 void PlottingWindow::setupPlot()
 {
 
-   //clear data
-   ui->widgetCustomPlot->clearGraphs();
-   ui->widgetCustomPlot->replot();
+  // clear data
+  ui->widgetCustomPlot->clearGraphs();
+  ui->widgetCustomPlot->replot();
   // seting up plot
   //-> x Axis setup
   ui->widgetCustomPlot->xAxis->label();
@@ -255,29 +255,29 @@ void PlottingWindow::on_properties_listView_clicked(const QModelIndex &index)
   bool changed = false;
   for (int i = 0; i < propertiesModel->rowCount(); i++)
   {
-      if(propertiesModel->item(i,0)->checkState() == Qt::Checked && !checkPropertyExistOnArray(propertiesModel->item(i,0)->text())) //adding graph
-      {
-        array.append( new dataStruct(propertiesModel->item(i,0)->text()));
-        changed = true;
-      }
-      else if(propertiesModel->item(i,0)->checkState() == Qt::Unchecked && checkPropertyExistOnArray(propertiesModel->item(i,0)->text()))
-      {
-        changed = true;
-        array.removeAt(i);
-      }
+    if (propertiesModel->item(i, 0)->checkState() == Qt::Checked && !checkPropertyExistOnArray(propertiesModel->item(i, 0)->text())) // adding graph
+    {
+      array.append(new dataStruct(propertiesModel->item(i, 0)->text()));
+      changed = true;
+    }
+    else if (propertiesModel->item(i, 0)->checkState() == Qt::Unchecked && checkPropertyExistOnArray(propertiesModel->item(i, 0)->text()))
+    {
+      changed = true;
+      array.removeAt(i);
+    }
   }
-  if(changed) //if new elementd added
-    setupPlot(); //setup again
+  if (changed)   // if new elementd added
+    setupPlot(); // setup again
 }
 
 bool PlottingWindow::checkPropertyExistOnArray(QString property)
 {
-    for(int i = 0; i < array.size(); i++)
+  for (int i = 0; i < array.size(); i++)
+  {
+    if (property == array[i]->name)
     {
-        if(property == array[i]->name)
-        {
-            return true;
-        }
-            return false;
+      return true;
     }
+    return false;
+  }
 }

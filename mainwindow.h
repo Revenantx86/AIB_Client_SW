@@ -14,7 +14,8 @@
 #include <QTcpSocket>
 #include <QFile>
 #include <QTextStream>
-
+#include <QtSql>
+#include <QSqlQuery>
 #include <QTextCursor>
 #include <QKeyEvent>
 
@@ -111,8 +112,10 @@ private slots:
     void on_Console_Export_exportConsole_pushButton_clicked();
 
 private:
-    QTimer *serialTimer;
-    QTcpSocket socket;
+    //  *** Private object definitions  *** //
+    QTimer *serialTimer;                                    //-> for timing applications
+    QTcpSocket socket;                                      //-> for tcp connection
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE"); //-> for database access
 
     //*** Pointer Conteiner to the Widgets ***// -> used to store open widget
     QList<PlottingWindow *> temperaturePlots; // stores open temperature plots pointers ->will be used when updating plots
@@ -130,11 +133,14 @@ private:
     QStandardItemModel *Data_tablewView_ItemModel;      // Model to store all incoming respond from server
     QStandardItemModel *Properties_tableView_ItemModel; // Model to store all properties received from server
 
-    // Key event
-    QString prevCommands[20]; // Array to store prev arrays
-    int prevIndex = 0;
+    void setupDatabase();                                                                                     // creating database on local repo
+    void addElementToDatabase(QString date,  QString sequence, QString note, QString property, QString value); // adding element to the database
 
-    void keyPressEvent(QKeyEvent *event) override;
+    //  ***  Key event  *** //
+    void keyPressEvent(QKeyEvent *event) override; // function to handle keypresses
+    QString prevCommands[20];                      // Array to store prev arrays
+    int prevIndex = 0;                             // default index to store command cycle
+
     void insertElementToBuffer(QString item);      // insert element to the queue
     bool checkElementExistsOnBuffer(QString item); // check if command already exists in the buffer
     void checkCommandExists(QString item);         // check command already exists in the stack

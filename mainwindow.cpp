@@ -36,6 +36,8 @@ MainWindow::~MainWindow()
 // setup layout
 void MainWindow::setup()
 {
+    // specift root directory location (debug)
+    qDebug() << QDir::homePath() << endl;
     // Console Text edit Setup
     ui->Console_textEdit->setTextInteractionFlags(Qt::NoTextInteraction);
 
@@ -54,7 +56,8 @@ void MainWindow::setup()
     insertElementToBuffer("get de1.temp");
     insertElementToBuffer("get de2.temp");
 
-    // demo graphs
+    // SQLite Database Initalization
+    setupDatabase();
 }
 
 /*
@@ -214,7 +217,8 @@ void MainWindow::onReadyRead() // triggers when byte received
     {
         handleCommand(rawData, ui);
         addData_tableView(datas);
-        addProperties_tableView(datas[4], datas[5]); // pass property and its value
+        addProperties_tableView(datas[4], datas[5]);                                       // pass property and its value
+        addElementToDatabase(datas[0] + datas[1], datas[2], datas[3], datas[4], datas[5]); // add message to the database
         //
         for (int i = 0; i < temperaturePlots.size(); i++) // for each open widget update existing plots
         {
@@ -537,4 +541,61 @@ void MainWindow::on_DataView_Export_exportConsole_pushButton_clicked()
         stream.flush();
     }
     file.close();
+}
+
+void MainWindow::setupDatabase()
+{
+
+    // create default path for fb
+    QString path = QDir::currentPath() +"/"+ QDateTime::currentDateTime().toString("MM-dd-HH:mm:ss");
+    path = path + ".db";
+    qDebug() << path << endl;
+    db.setDatabaseName(path);
+
+    // open database
+    if (!db.open())
+    {
+        displayMessageBox("An Error occured while setting up database ! ", "black");
+        qDebug() << "An Error occured while creating database ! " << endl;
+    }
+    // create script for table struct
+    QString setupScript = "CREATE TABLE database ("
+                          "Timestamp VARCHAR(20),"
+                          "SequenceNumber VARCHAR(20),"
+                          "Note VARCHAR(20),"
+                          "Property VARCHAR(20),"
+                          "Value VARCHAR(20) );";
+    QSqlQuery query;
+    // create table
+    if (!query.exec(setupScript))
+    {
+        displayMessageBox("An Error occured while setting up database ! ", "black");
+        qDebug() << "An Error occured while creating database ! " << endl;
+    }
+}
+
+void MainWindow::addElementToDatabase(QString date, QString sequence, QString note, QString property, QString value) // adding element to the database
+{
+
+    QSqlQuery query;
+
+    query.prepare("INSERT INTO database ("
+                  "Timestamp, "
+                  "SequenceNumber, "
+                  "Note, "
+                  "Property, "
+                  "Value) "
+                  "VALUES (?,?,?,?,?);");
+
+    query.addBindValue(date);
+    query.addBindValue(sequence);
+    query.addBindValue(note);
+    query.addBindValue(property);
+    query.addBindValue(value);
+
+    if (!query.exec())
+    {
+        displayMessageBox("An Error occured while adding value to database ! ", "black");
+        qDebug() << "An Error occured while creating database ! " << endl;
+    }
 }
