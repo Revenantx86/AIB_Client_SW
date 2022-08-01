@@ -217,8 +217,8 @@ void MainWindow::onReadyRead() // triggers when byte received
     {
         handleCommand(rawData, ui);
         addData_tableView(datas);
-        addProperties_tableView(datas[4], datas[5]);                                       // pass property and its value
-        addElementToDatabase(datas[0] + datas[1], datas[2], datas[3], datas[4], datas[5]); // add message to the database
+        addProperties_tableView(datas[4], datas[5]);                                             // pass property and its value
+        addElementToDatabase(datas[0] + "-" + datas[1], datas[2], datas[3], datas[4], datas[5]); // add message to the database
         //
         for (int i = 0; i < temperaturePlots.size(); i++) // for each open widget update existing plots
         {
@@ -547,7 +547,7 @@ void MainWindow::setupDatabase()
 {
 
     // create default path for fb
-    QString path = QDir::currentPath() +"/"+ QDateTime::currentDateTime().toString("MM-dd-HH:mm:ss");
+    QString path = QDir::currentPath() + "/" + QDateTime::currentDateTime().toString("MM-dd-HH:mm:ss");
     path = path + ".db";
     qDebug() << path << endl;
     db.setDatabaseName(path);

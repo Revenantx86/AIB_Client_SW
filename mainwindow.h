@@ -134,7 +134,7 @@ private:
     QStandardItemModel *Properties_tableView_ItemModel; // Model to store all properties received from server
 
     void setupDatabase();                                                                                     // creating database on local repo
-    void addElementToDatabase(QString date,  QString sequence, QString note, QString property, QString value); // adding element to the database
+    void addElementToDatabase(QString date, QString sequence, QString note, QString property, QString value); // adding element to the database
 
     //  ***  Key event  *** //
     void keyPressEvent(QKeyEvent *event) override; // function to handle keypresses
