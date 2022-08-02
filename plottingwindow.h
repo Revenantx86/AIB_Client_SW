@@ -70,7 +70,7 @@ private:
     QStandardItemModel *mainPropertiesModel;
 
     QVector<dataStruct *> array;
-
+    int prevIndex = 0;
     QStringList targets;
     QString targetName;
     int verticalMax = 300;

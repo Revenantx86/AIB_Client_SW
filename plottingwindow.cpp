@@ -28,7 +28,6 @@ PlottingWindow::PlottingWindow(QStandardItemModel *target, QStandardItemModel *m
   dataStruct *temp = new dataStruct(name);
   array.append(temp);
 
-
   setupProperties_ListView();
   setupPlot();
 
@@ -130,9 +129,9 @@ void PlottingWindow::setupPlot()
   for (int i = 0; i < array.size(); i++) // for each element to be plotted
   {
 
-    array[i]->x.clear();    //reset data on x axis
-    array[i]->y.clear();    //reset data on y axis
-    for (int j = 0; j < targetModel->rowCount(); j++) //for each element in database -> search element match in database
+    array[i]->x.clear();                              // reset data on x axis
+    array[i]->y.clear();                              // reset data on y axis
+    for (int j = 0; j < targetModel->rowCount(); j++) // for each element in database -> search element match in database
     {
 
       if ((targetModel->item(j, 4)->text().size() > 0) && (array[i]->name == targetModel->item(j, 4)->text()))
@@ -148,13 +147,14 @@ void PlottingWindow::setupPlot()
       array[i]->x.append(n);
     }
 
-
     ui->widgetCustomPlot->addGraph()->setData(array[i]->x, array[i]->y);
     ui->widgetCustomPlot->graph(i)->setName(array[i]->name);
     ui->widgetCustomPlot->xAxis->setRange(0, array[i]->y.length() - 1);
 
     ui->widgetCustomPlot->replot();
   }
+  // -> saving the previous index
+  prevIndex = targetModel->rowCount();
   //
   // Style Options
   QColor color(20 + 200 / 4.0, 70 * (1.6 / 4.0), 150, 150);
@@ -170,11 +170,11 @@ void PlottingWindow::setupPlot()
 
 void PlottingWindow::updatePlot()
 {
-  // n^2 on large property set !
+  // O(n^2) on large property set !
   for (int i = 0; i < array.size(); i++)
   {
     int prevSize = array[i]->y.size();
-    for (int j = 0; j < targetModel->rowCount(); j++)
+    for (int j = prevIndex; j < targetModel->rowCount(); j++)
     {
 
       if ((targetModel->item(j, 4)->text().size() > 0) && (targetModel->item(j, 4)->text() == array[i]->name))
@@ -195,6 +195,7 @@ void PlottingWindow::updatePlot()
 
     ui->widgetCustomPlot->replot();
   }
+  prevIndex = targetModel->rowCount();
 }
 
 void PlottingWindow::on_pushButton_clicked()
