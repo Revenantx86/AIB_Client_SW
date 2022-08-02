@@ -13,6 +13,7 @@ PlottingWindow::PlottingWindow(QWidget *parent) : QWidget(parent),
 PlottingWindow::PlottingWindow(QStandardItemModel *target, QStandardItemModel *mainProperties, QString name, QWidget *parent) : QWidget(parent), ui(new Ui::PlottingWindow)
 {
   // Setup Plotting settings
+  ui->setupUi(this);
 
   setupSettings();
 
@@ -27,7 +28,6 @@ PlottingWindow::PlottingWindow(QStandardItemModel *target, QStandardItemModel *m
   dataStruct *temp = new dataStruct(name);
   array.append(temp);
 
-  ui->setupUi(this);
 
   setupProperties_ListView();
   setupPlot();
@@ -127,13 +127,12 @@ void PlottingWindow::setupPlot()
   // adding interaction
   ui->widgetCustomPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes | QCP::iSelectLegend | QCP::iSelectPlottables);
 
-  //
-  for (int i = 0; i < array.size(); i++)
+  for (int i = 0; i < array.size(); i++) // for each element to be plotted
   {
 
-    array[i]->x.clear();
-    array[i]->y.clear();
-    for (int j = 0; j < targetModel->rowCount(); j++)
+    array[i]->x.clear();    //reset data on x axis
+    array[i]->y.clear();    //reset data on y axis
+    for (int j = 0; j < targetModel->rowCount(); j++) //for each element in database -> search element match in database
     {
 
       if ((targetModel->item(j, 4)->text().size() > 0) && (array[i]->name == targetModel->item(j, 4)->text()))
@@ -149,7 +148,9 @@ void PlottingWindow::setupPlot()
       array[i]->x.append(n);
     }
 
+
     ui->widgetCustomPlot->addGraph()->setData(array[i]->x, array[i]->y);
+    ui->widgetCustomPlot->graph(i)->setName(array[i]->name);
     ui->widgetCustomPlot->xAxis->setRange(0, array[i]->y.length() - 1);
 
     ui->widgetCustomPlot->replot();

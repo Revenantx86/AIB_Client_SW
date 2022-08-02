@@ -113,7 +113,7 @@ void MainWindow::setCommandTree()
 void MainWindow::setupData_tableView()
 {
     //
-    QList<QStandardItem *> headerItem; // list of standard Item  -> append each column
+    QList<QStandardItem *> headerItem; // list of standard Item  -> append each column -> align at center
     headerItem.append(new QStandardItem("<Timestamp>"));
     headerItem[0]->setTextAlignment(Qt::AlignCenter);
     headerItem.append(new QStandardItem("<Timestamp>"));
