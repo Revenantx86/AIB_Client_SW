@@ -259,10 +259,10 @@ void PlottingWindow::on_properties_listView_clicked(const QModelIndex &index)
   {
     if (propertiesModel->item(i, 0)->checkState() == Qt::Checked && !checkPropertyExistOnArray(propertiesModel->item(i, 0)->text())) // adding graph
     {
-      array.append(new dataStruct(propertiesModel->item(i, 0)->text()));
+      array.push_back(new dataStruct(propertiesModel->item(i, 0)->text()));
       changed = true;
     }
-    else if (propertiesModel->item(i, 0)->checkState() == Qt::Unchecked && checkPropertyExistOnArray(propertiesModel->item(i, 0)->text()))
+    else if (propertiesModel->item(i,0)->checkState() != Qt::Checked && checkPropertyExistOnArray(propertiesModel->item(i,0)->text()) )
     {
       changed = true;
       array.removeAt(i);
@@ -280,6 +280,6 @@ bool PlottingWindow::checkPropertyExistOnArray(QString property)
     {
       return true;
     }
-    return false;
   }
+  return false;
 }
