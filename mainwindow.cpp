@@ -36,6 +36,7 @@ MainWindow::~MainWindow()
 // setup layout
 void MainWindow::setup()
 {
+    setupDataFolder();
     // specift root directory location (debug)
     qDebug() << QDir::homePath() << endl;
     // Console Text edit Setup
@@ -225,16 +226,6 @@ void MainWindow::onReadyRead() // triggers when byte received
             temperaturePlots[i]->updatePlot();
         }
     }
-
-    /*
-    if (datas.size() <= 3 || rawData == "Succesfully Connected to Host \r\n") // if answer is regular
-    {
-    }
-    else // else if answer for changed event
-    {
-
-    }
-    */
 }
 //
 // *** Method for sending bytes to TCP Socket ***//
@@ -547,7 +538,7 @@ void MainWindow::setupDatabase()
 {
 
     // create default path for fb
-    QString path = QDir::currentPath() + "/" + QDateTime::currentDateTime().toString("MM-dd-HH:mm:ss");
+    QString path = QDir::currentPath() + "/data/" + QDateTime::currentDateTime().toString("MM-dd-HH:mm:ss");
     path = path + ".db";
     qDebug() << path << endl;
     db.setDatabaseName(path);
@@ -597,5 +588,22 @@ void MainWindow::addElementToDatabase(QString date, QString sequence, QString no
     {
         displayMessageBox("An Error occured while adding value to database ! ", "black");
         qDebug() << "An Error occured while creating database ! " << endl;
+    }
+}
+
+/*
+ * Reveals the folder location of database
+ */
+void MainWindow::on_ShowFolder_pushButton_clicked()
+{
+    QString path = QDir::currentPath();
+    QDesktopServices::openUrl(QUrl::fromLocalFile(path));
+}
+
+void MainWindow::setupDataFolder()
+{
+    if (!QDir("data").exists())
+    {
+        QDir().mkdir("data");
     }
 }

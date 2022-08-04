@@ -45,7 +45,12 @@ public:
     // ***  Properties list View Functions  *** //
     void setupProperties_ListView();
     bool checkPropertyExistOnListView(QString property); // check property already exists on the list view
-    bool checkPropertyExistOnArray(QString property);
+
+    // *** Properties array *** //
+    // -> array used for LUT table for plotting function
+    // -> if item exists in the array plotter will plot it
+    bool checkPropertyExistOnArray(QString property); // Checks if property exists in the aray
+    int indexOfPropertyOnArray(QString property);     //-> returns the index of element in the array
     // Continious data adding
     void updatePlot();
 

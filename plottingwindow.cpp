@@ -107,65 +107,68 @@ bool PlottingWindow::checkPropertyExistOnListView(QString property)
 
 void PlottingWindow::setupPlot()
 {
-
   // clear data
   ui->widgetCustomPlot->clearGraphs();
   ui->widgetCustomPlot->replot();
-  // seting up plot
-  //-> x Axis setup
-  ui->widgetCustomPlot->xAxis->label();
-  ui->widgetCustomPlot->xAxis->setTickLabels(false);
-  ui->widgetCustomPlot->xAxis->setLabel("Time");
-  ui->widgetCustomPlot->xAxis2->setVisible(true);
-  ui->widgetCustomPlot->xAxis2->setTickLabels(false);
-  ui->widgetCustomPlot->yAxis2->setVisible(true);
-  ui->widgetCustomPlot->yAxis2->setTickLabels(false);
-  ui->widgetCustomPlot->yAxis->setRange(0, verticalMax);
-  ui->widgetCustomPlot->yAxis->ticker()->setTickCount(10);
-
-  // adding interaction
-  ui->widgetCustomPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes | QCP::iSelectLegend | QCP::iSelectPlottables);
-
-  for (int i = 0; i < array.size(); i++) // for each element to be plotted
+  if (array.size() > 0)
   {
 
-    array[i]->x.clear();                              // reset data on x axis
-    array[i]->y.clear();                              // reset data on y axis
-    for (int j = 0; j < targetModel->rowCount(); j++) // for each element in database -> search element match in database
+    // seting up plot
+    //-> x Axis setup
+    ui->widgetCustomPlot->xAxis->label();
+    ui->widgetCustomPlot->xAxis->setTickLabels(false);
+    ui->widgetCustomPlot->xAxis->setLabel("Time");
+    ui->widgetCustomPlot->xAxis2->setVisible(true);
+    ui->widgetCustomPlot->xAxis2->setTickLabels(false);
+    ui->widgetCustomPlot->yAxis2->setVisible(true);
+    ui->widgetCustomPlot->yAxis2->setTickLabels(false);
+    ui->widgetCustomPlot->yAxis->setRange(0, verticalMax);
+    ui->widgetCustomPlot->yAxis->ticker()->setTickCount(10);
+
+    // adding interaction
+    ui->widgetCustomPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes | QCP::iSelectLegend | QCP::iSelectPlottables);
+
+    for (int i = 0; i < array.size(); i++) // for each element to be plotted
     {
 
-      if ((targetModel->item(j, 4)->text().size() > 0) && (array[i]->name == targetModel->item(j, 4)->text()))
+      array[i]->x.clear();                              // reset data on x axis
+      array[i]->y.clear();                              // reset data on y axis
+      for (int j = 0; j < targetModel->rowCount(); j++) // for each element in database -> search element match in database
       {
-        QStringList temp = targetModel->item(j, 5)->text().split("/");
-        array[i]->y.append(temp[0].toDouble());
-        array[i]->dates.append(targetModel->item(j, 0)->text() + targetModel->item(j, 1)->text());
+
+        if ((targetModel->item(j, 4)->text().size() > 0) && (array[i]->name == targetModel->item(j, 4)->text()))
+        {
+          QStringList temp = targetModel->item(j, 5)->text().split("/");
+          array[i]->y.append(temp[0].toDouble());
+          array[i]->dates.append(targetModel->item(j, 0)->text() + targetModel->item(j, 1)->text());
+        }
       }
+
+      for (int n = 0; n < array[i]->y.size(); n++)
+      {
+        array[i]->x.append(n);
+      }
+
+      ui->widgetCustomPlot->addGraph()->setData(array[i]->x, array[i]->y);
+      ui->widgetCustomPlot->graph(i)->setName(array[i]->name);
+      ui->widgetCustomPlot->xAxis->setRange(0, array[i]->y.length() - 1);
+
+      ui->widgetCustomPlot->replot();
     }
+    // -> saving the previous index
+    prevIndex = targetModel->rowCount();
+    //
+    // Style Options
+    QColor color(20 + 200 / 4.0, 70 * (1.6 / 4.0), 150, 150);
+    ui->widgetCustomPlot->graph()->setLineStyle(QCPGraph::lsLine);
+    ui->widgetCustomPlot->graph()->setPen(QPen(color));
+    ui->widgetCustomPlot->graph()->setScatterStyle(QCPScatterStyle(shapes[4], 5));
+    // ui->widgetCustomPlot->graph()->setBrush(QBrush(color));
 
-    for (int n = 0; n < array[i]->y.size(); n++)
-    {
-      array[i]->x.append(n);
-    }
-
-    ui->widgetCustomPlot->addGraph()->setData(array[i]->x, array[i]->y);
-    ui->widgetCustomPlot->graph(i)->setName(array[i]->name);
-    ui->widgetCustomPlot->xAxis->setRange(0, array[i]->y.length() - 1);
-
+    ui->widgetCustomPlot->yAxis->setLabel("Temperature");
+    ui->widgetCustomPlot->xAxis->setLabel("Time");
     ui->widgetCustomPlot->replot();
   }
-  // -> saving the previous index
-  prevIndex = targetModel->rowCount();
-  //
-  // Style Options
-  QColor color(20 + 200 / 4.0, 70 * (1.6 / 4.0), 150, 150);
-  ui->widgetCustomPlot->graph()->setLineStyle(QCPGraph::lsLine);
-  ui->widgetCustomPlot->graph()->setPen(QPen(color));
-  ui->widgetCustomPlot->graph()->setScatterStyle(QCPScatterStyle(shapes[4], 5));
-  // ui->widgetCustomPlot->graph()->setBrush(QBrush(color));
-
-  ui->widgetCustomPlot->yAxis->setLabel("Temperature");
-  ui->widgetCustomPlot->xAxis->setLabel("Time");
-  ui->widgetCustomPlot->replot();
 }
 
 void PlottingWindow::updatePlot()
@@ -262,10 +265,10 @@ void PlottingWindow::on_properties_listView_clicked(const QModelIndex &index)
       array.push_back(new dataStruct(propertiesModel->item(i, 0)->text()));
       changed = true;
     }
-    else if (propertiesModel->item(i,0)->checkState() != Qt::Checked && checkPropertyExistOnArray(propertiesModel->item(i,0)->text()) )
+    else if (propertiesModel->item(i, 0)->checkState() != Qt::Checked && checkPropertyExistOnArray(propertiesModel->item(i, 0)->text()))
     {
       changed = true;
-      array.removeAt(i);
+      array.removeAt(indexOfPropertyOnArray(propertiesModel->item(i, 0)->text()));
     }
   }
   if (changed)   // if new elementd added
@@ -282,4 +285,16 @@ bool PlottingWindow::checkPropertyExistOnArray(QString property)
     }
   }
   return false;
+}
+
+int PlottingWindow::indexOfPropertyOnArray(QString property)
+{
+  for (int i = 0; i < array.size(); i++)
+  {
+    if (array[i]->name == property)
+    {
+      return i;
+    }
+  }
+  return -1;
 }

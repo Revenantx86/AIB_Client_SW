@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Plotting Window</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_4">
    <item>
@@ -40,7 +40,7 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="Setting_tab">
         <attribute name="title">
@@ -121,7 +121,7 @@
           <rect>
            <x>10</x>
            <y>10</y>
-           <width>258</width>
+           <width>261</width>
            <height>491</height>
           </rect>
          </property>
@@ -130,7 +130,7 @@
            <enum>QLayout::SetNoConstraint</enum>
           </property>
           <item>
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="propertties_label">
             <property name="sizePolicy">
              <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
               <horstretch>0</horstretch>
@@ -153,33 +153,14 @@
            </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="property_add_remove_horizontalLayout">
+           <layout class="QHBoxLayout" name="property_add_remove_horizontalLayout" stretch="2">
             <property name="leftMargin">
-             <number>150</number>
+             <number>130</number>
             </property>
             <item>
-             <widget class="QPushButton" name="addProperty_pushButton">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
+             <widget class="QPushButton" name="refreshProperties_pushButton">
               <property name="text">
-               <string>+</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="removeProperty_pushButton">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>-</string>
+               <string>Refresh</string>
               </property>
              </widget>
             </item>

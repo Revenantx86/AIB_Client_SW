@@ -64,6 +64,8 @@ public:
     /*
      * Custom Data Table Setup Functions
      */
+
+    void setupDataFolder(); //-> creates folder for storing data
     // Data table
     void setupData_tableView();                //-> function to setup dataTable View
     void addData_tableView(QStringList datas); //-> function to add item to existing table View
@@ -110,6 +112,7 @@ private slots:
     void on_Console_Clear_pushButton_clicked();
 
     void on_Console_Export_exportConsole_pushButton_clicked();
+    void on_ShowFolder_pushButton_clicked();
 
 private:
     //  *** Private object definitions  *** //
