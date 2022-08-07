@@ -41,6 +41,20 @@ PlottingWindow::PlottingWindow(QStandardItemModel *target, QStandardItemModel *m
 
   ui->widgetCustomPlot->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(ui->widgetCustomPlot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextMenuRequest(QPoint)));
+
+
+  QObject::connect(ui->widgetCustomPlot, SIGNAL(mouseMove(QMouseEvent*)), this,SLOT(mouseMove(QMouseEvent*)));
+
+}
+
+void PlottingWindow::mouseMove(QMouseEvent *event)
+{
+    int x = ui->widgetCustomPlot->xAxis->pixelToCoord(event->pos().x());
+    int y = ui->widgetCustomPlot->yAxis->pixelToCoord(event->pos().y());
+
+    QToolTip::showText(event->globalPos(), array[0]->dates[x]+ " \n x coords: " + QString::number(x) + " y coords: " + QString::number(y));
+
+    setToolTip(QString("%1 , %2").arg(x).arg(y));
 }
 
 PlottingWindow::~PlottingWindow()

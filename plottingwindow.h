@@ -72,6 +72,8 @@ private slots:
     void changeColor();
     void changeScatterStyle();
 
+    void mouseMove(QMouseEvent *event);
+
 private:
     Ui::PlottingWindow *ui;
 
