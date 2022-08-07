@@ -596,7 +596,7 @@ void MainWindow::addElementToDatabase(QString date, QString sequence, QString no
  */
 void MainWindow::on_ShowFolder_pushButton_clicked()
 {
-    QString path = QDir::currentPath();
+    QString path = QDir::currentPath() + "/data";
     QDesktopServices::openUrl(QUrl::fromLocalFile(path));
 }
 

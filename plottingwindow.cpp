@@ -226,11 +226,14 @@ void PlottingWindow::contextMenuRequest(QPoint pos)
   }
   else // general context menu on graphs requested
   {
+    /*
     menu->addAction("Add random graph", this, SLOT(addRandomGraph()));
     if (ui->widgetCustomPlot->selectedGraphs().size() > 0)
       menu->addAction("Remove selected graph", this, SLOT(removeSelectedGraph()));
     if (ui->widgetCustomPlot->graphCount() > 0)
       menu->addAction("Remove all graphs", this, SLOT(removeAllGraphs()));
+      */
+    setupContexMenu(menu);
   }
 
   menu->popup(ui->widgetCustomPlot->mapToGlobal(pos));
@@ -297,4 +300,32 @@ int PlottingWindow::indexOfPropertyOnArray(QString property)
     }
   }
   return -1;
+}
+
+void PlottingWindow::setupContexMenu(QMenu *menu)
+{
+  QMenu *scatterStyleSubmenu = menu->addMenu("Scatter Style");
+  QAction *actionScatterStyle_setup = scatterStyleSubmenu->addAction("Cross");
+  QAction *action1ScatterStyle_setup = scatterStyleSubmenu->addAction("Plus");
+  QAction *action2ScatterStyle_setup = scatterStyleSubmenu->addAction("Circle");
+  QAction *action3ScatterStyle_setup = scatterStyleSubmenu->addAction("Disc");
+  QAction *action4ScatterStyle_setup = scatterStyleSubmenu->addAction("Square");
+
+  QMenu *colorStyleSubmenu = menu->addMenu("Line Color");
+  QAction *actionStyleMenu = colorStyleSubmenu->addAction("red", this, SLOT(changeColor()));
+  QAction *action1StyleMenu = colorStyleSubmenu->addAction("green", this, SLOT(changeColor()));
+  QAction *action2StyleMenu = colorStyleSubmenu->addAction("blue", this, SLOT(changeColor()));
+  QAction *action3StyleMenu = colorStyleSubmenu->addAction("cyan", this, SLOT(changeColor()));
+  QAction *action4StyleMenu = colorStyleSubmenu->addAction("magenta", this, SLOT(changeColor()));
+}
+
+void PlottingWindow::changeColor()
+{
+  if (ui->widgetCustomPlot->selectedGraphs().size() > 0)
+  {
+    if (QAction *contextAction = qobject_cast<QAction *>(sender())) // make sure this slot is really called by a context menu action, so it carries the data we need
+    {
+      ui->widgetCustomPlot->selectedGraphs().first()->setPen(QPen(contextAction->iconText()));
+    }
+  }
 }

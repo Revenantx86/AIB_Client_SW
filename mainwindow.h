@@ -18,6 +18,7 @@
 #include <QSqlQuery>
 #include <QTextCursor>
 #include <QKeyEvent>
+#include <QAction>
 
 //
 //***------- user Libraries ----***//

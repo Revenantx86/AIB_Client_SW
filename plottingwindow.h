@@ -8,6 +8,7 @@
 #include <QColor>
 #include "qcustomplot.h"
 #include <QInputDialog>
+#include <QAction>
 
 // ->  data structure for the plot
 struct dataStruct
@@ -54,6 +55,7 @@ public:
     // Continious data adding
     void updatePlot();
 
+    void setupContexMenu(QMenu *menu);
 private slots:
     void on_pushButton_clicked();
 
@@ -66,6 +68,9 @@ private slots:
     void moveLegend();                   // moving legend
 
     void on_properties_listView_activated(const QModelIndex &index);
+
+    void changeColor();
+
 
 private:
     Ui::PlottingWindow *ui;
@@ -84,6 +89,13 @@ private:
     // Storage for plotting settings
     QVector<QCPScatterStyle::ScatterShape> shapes;
     QVector<QCPGraph::LineStyle> lines;
+
+
+    QVariant red;
+
+
+
 };
+
 
 #endif // TEMPERATUREPLOT_H
