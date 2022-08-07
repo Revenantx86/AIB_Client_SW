@@ -152,6 +152,7 @@ void PlottingWindow::setupPlot()
       ui->widgetCustomPlot->addGraph()->setData(array[i]->x, array[i]->y);
       ui->widgetCustomPlot->graph(i)->setName(array[i]->name);
       ui->widgetCustomPlot->xAxis->setRange(0, array[i]->y.length() - 1);
+      ui->widgetCustomPlot->graph()->setScatterStyle(QCPScatterStyle(shapes[i], 5));
 
       ui->widgetCustomPlot->replot();
     }
@@ -162,7 +163,6 @@ void PlottingWindow::setupPlot()
     QColor color(20 + 200 / 4.0, 70 * (1.6 / 4.0), 150, 150);
     ui->widgetCustomPlot->graph()->setLineStyle(QCPGraph::lsLine);
     ui->widgetCustomPlot->graph()->setPen(QPen(color));
-    ui->widgetCustomPlot->graph()->setScatterStyle(QCPScatterStyle(shapes[4], 5));
     // ui->widgetCustomPlot->graph()->setBrush(QBrush(color));
 
     ui->widgetCustomPlot->yAxis->setLabel("Temperature");
@@ -305,11 +305,11 @@ int PlottingWindow::indexOfPropertyOnArray(QString property)
 void PlottingWindow::setupContexMenu(QMenu *menu)
 {
   QMenu *scatterStyleSubmenu = menu->addMenu("Scatter Style");
-  QAction *actionScatterStyle_setup = scatterStyleSubmenu->addAction("Cross");
-  QAction *action1ScatterStyle_setup = scatterStyleSubmenu->addAction("Plus");
-  QAction *action2ScatterStyle_setup = scatterStyleSubmenu->addAction("Circle");
-  QAction *action3ScatterStyle_setup = scatterStyleSubmenu->addAction("Disc");
-  QAction *action4ScatterStyle_setup = scatterStyleSubmenu->addAction("Square");
+  QAction *actionScatterStyle_setup = scatterStyleSubmenu->addAction("Cross", this, SLOT(changeScatterStyle()));
+  QAction *action1ScatterStyle_setup = scatterStyleSubmenu->addAction("Plus",this,SLOT(changeScatterStyle()));
+  QAction *action2ScatterStyle_setup = scatterStyleSubmenu->addAction("Circle",this,SLOT(changeScatterStyle()));
+  QAction *action3ScatterStyle_setup = scatterStyleSubmenu->addAction("Disc",this,SLOT(changeScatterStyle()));
+  QAction *action4ScatterStyle_setup = scatterStyleSubmenu->addAction("Square",this,SLOT(changeScatterStyle()));
 
   QMenu *colorStyleSubmenu = menu->addMenu("Line Color");
   QAction *actionStyleMenu = colorStyleSubmenu->addAction("red", this, SLOT(changeColor()));
@@ -326,6 +326,27 @@ void PlottingWindow::changeColor()
     if (QAction *contextAction = qobject_cast<QAction *>(sender())) // make sure this slot is really called by a context menu action, so it carries the data we need
     {
       ui->widgetCustomPlot->selectedGraphs().first()->setPen(QPen(contextAction->iconText()));
+    }
+  }
+}
+
+void PlottingWindow::changeScatterStyle()
+{
+  if (ui->widgetCustomPlot->selectedGraphs().size() > 0)
+  {
+    if (QAction *contextAction = qobject_cast<QAction *>(sender())) // make sure this slot is really called by a context menu action, so it carries the data we need
+    {
+      if (contextAction->iconText() == "Cross")      
+       ui->widgetCustomPlot->selectedGraphs().first()->setScatterStyle(QCPScatterStyle(shapes[0], 5));
+      else if (contextAction->iconText() == "Plus")
+          ui->widgetCustomPlot->selectedGraphs().first()->setScatterStyle(QCPScatterStyle(shapes[1], 5));
+      else if (contextAction->iconText() == "Circle")
+          ui->widgetCustomPlot->selectedGraphs().first()->setScatterStyle(QCPScatterStyle(shapes[2], 5));
+      else if (contextAction->iconText() == "Disc")
+          ui->widgetCustomPlot->selectedGraphs().first()->setScatterStyle(QCPScatterStyle(shapes[3], 5));
+      else if (contextAction->iconText() == "Square")
+          ui->widgetCustomPlot->selectedGraphs().first()->setScatterStyle(QCPScatterStyle(shapes[4], 5));
+
     }
   }
 }

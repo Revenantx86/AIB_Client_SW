@@ -70,7 +70,7 @@ private slots:
     void on_properties_listView_activated(const QModelIndex &index);
 
     void changeColor();
-
+    void changeScatterStyle();
 
 private:
     Ui::PlottingWindow *ui;
