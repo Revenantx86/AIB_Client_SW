@@ -17,6 +17,8 @@ PlottingWindow::PlottingWindow(QStandardItemModel *target, QStandardItemModel *m
 
   setupSettings();
 
+  // time plotting
+  startTime = QDateTime::currentDateTime().toTime_t();
   //
   mainPropertiesModel = mainProperties;
   //
@@ -52,9 +54,12 @@ void PlottingWindow::mouseMove(QMouseEvent *event)
     int x = ui->widgetCustomPlot->xAxis->pixelToCoord(event->pos().x());
     int y = ui->widgetCustomPlot->yAxis->pixelToCoord(event->pos().y());
 
-    QToolTip::showText(event->globalPos(), array[0]->dates[x]+ " \n x coords: " + QString::number(x) + " y coords: " + QString::number(y));
+    // array[0]->dates[x]+
 
-    setToolTip(QString("%1 , %2").arg(x).arg(y));
+
+    QToolTip::showText(event->globalPos(), QDateTime::fromTime_t(x).toString() + " y coords: " + QString::number(y));
+
+    //setToolTip(QString("%1 , %2").arg(x).arg(y));
 }
 
 PlottingWindow::~PlottingWindow()
@@ -139,6 +144,10 @@ void PlottingWindow::setupPlot()
     ui->widgetCustomPlot->yAxis->setRange(0, verticalMax);
     ui->widgetCustomPlot->yAxis->ticker()->setTickCount(10);
 
+    QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
+    dateTicker->setDateTimeFormat("yyyy-MM-dd-hh:mm:ss");
+    ui->widgetCustomPlot->xAxis->setTicker(dateTicker);
+
     // adding interaction
     ui->widgetCustomPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes | QCP::iSelectLegend | QCP::iSelectPlottables);
 
@@ -147,25 +156,33 @@ void PlottingWindow::setupPlot()
 
       array[i]->x.clear();                              // reset data on x axis
       array[i]->y.clear();                              // reset data on y axis
+
+      ui->widgetCustomPlot->addGraph();
+
       for (int j = 0; j < targetModel->rowCount(); j++) // for each element in database -> search element match in database
       {
 
         if ((targetModel->item(j, 4)->text().size() > 0) && (array[i]->name == targetModel->item(j, 4)->text()))
         {
-          QStringList temp = targetModel->item(j, 5)->text().split("/");
-          array[i]->y.append(temp[0].toDouble());
-          array[i]->dates.append(targetModel->item(j, 0)->text() + targetModel->item(j, 1)->text());
+            //QCPGraphData * tempData = new QCPGraphData();
+            QString dateTemp = targetModel->item(j, 0)->text() +"-"+ targetModel->item(j, 1)->text();
+            QDateTime Date = QDateTime::fromString(dateTemp,"yyyy-MM-dd-hh:mm:ss");
+            double dateDouble = Date.toTime_t();
+            //QDateTime Date = QDate::fromString("20/12/2015","dd/MM/yyyy");
+            //tempData->key = targetModel->item(j, 0)->text() + targetModel->item(j, 1)->text();
+            QStringList temp = targetModel->item(j, 5)->text().split("/");
+            QCPGraphData tempTimeData;
+            tempTimeData.key = dateDouble;
+            tempTimeData.value = temp[0].toDouble();
+            array[i]->timeData.push_back(tempTimeData);
+            //array[i]->y.append(temp[0].toDouble()); // Append Y value
+            //array[i]->x.append(dateDouble);
+            //array[i]->dates.append(targetModel->item(j, 0)->text() + targetModel->item(j, 1)->text());
         }
       }
-
-      for (int n = 0; n < array[i]->y.size(); n++)
-      {
-        array[i]->x.append(n);
-      }
-
-      ui->widgetCustomPlot->addGraph()->setData(array[i]->x, array[i]->y);
+      ui->widgetCustomPlot->graph(i)->data()->set(array[i]->timeData);
       ui->widgetCustomPlot->graph(i)->setName(array[i]->name);
-      ui->widgetCustomPlot->xAxis->setRange(0, array[i]->y.length() - 1);
+      ui->widgetCustomPlot->xAxis->setRange(array[i]->timeData[0].key, QDateTime::currentDateTime().toTime_t());
       ui->widgetCustomPlot->graph()->setScatterStyle(QCPScatterStyle(shapes[i], 5));
 
       ui->widgetCustomPlot->replot();
@@ -196,19 +213,24 @@ void PlottingWindow::updatePlot()
 
       if ((targetModel->item(j, 4)->text().size() > 0) && (targetModel->item(j, 4)->text() == array[i]->name))
       {
-        QStringList temp = targetModel->item(j, 5)->text().split("/");
-        array[i]->y.append(temp[0].toDouble());
-        array[i]->dates.append(targetModel->item(j, 0)->text() + targetModel->item(j, 1)->text());
+          //QCPGraphData * tempData = new QCPGraphData();
+          QString dateTemp = targetModel->item(j, 0)->text() +"-"+ targetModel->item(j, 1)->text();
+          QDateTime Date = QDateTime::fromString(dateTemp,"yyyy-MM-dd-hh:mm:ss");
+          double dateDouble = Date.toTime_t();
+          //QDateTime Date = QDate::fromString("20/12/2015","dd/MM/yyyy");
+          //tempData->key = targetModel->item(j, 0)->text() + targetModel->item(j, 1)->text();
+          QStringList temp = targetModel->item(j, 5)->text().split("/");
+          QCPGraphData tempTimeData;
+          tempTimeData.key = dateDouble;
+          tempTimeData.value = temp[0].toDouble();
+          array[i]->timeData.push_back(tempTimeData);
       }
     }
 
-    for (int n = prevSize; n < array[i]->y.size(); n++)
-    {
-      array[i]->x.append(n);
-    }
 
-    ui->widgetCustomPlot->graph(i)->setData(array[i]->x, array[i]->y);
-    ui->widgetCustomPlot->xAxis->setRange(0, array[i]->y.length() - 1);
+    ui->widgetCustomPlot->graph(i)->data()->set(array[i]->timeData);
+
+    ui->widgetCustomPlot->xAxis->setRange(array[i]->timeData[0].key, QDateTime::currentDateTime().toTime_t());
 
     ui->widgetCustomPlot->replot();
   }

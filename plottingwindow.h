@@ -22,6 +22,7 @@ public:
     QVector<QString> dates;
     QVector<double> x;
     QVector<double> y;
+    QVector<QCPGraphData> timeData;
 };
 //
 //
@@ -94,7 +95,7 @@ private:
 
 
     QVariant red;
-
+    double startTime;
 
 
 };
