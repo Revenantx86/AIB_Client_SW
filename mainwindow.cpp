@@ -6,12 +6,11 @@
 
 #include <QtWidgets/QFileDialog>
 
-#include "handleCommand.cpp"
-
 //  -----------      ----------------                Ui Initalization Functions                     ----------------              ---------------- //
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    this->setFixedSize(this->width(), this->height()); // disable maximizing
     //
     serialTimer = new QTimer(this);
     mainItemModel = new QStandardItemModel(this);
@@ -29,61 +28,68 @@ MainWindow::~MainWindow()
 
     delete ui;
 }
-//
-/*
- * Setup layout
+
+/**
+ * @brief main setup function caller
+ *
+ *  This function calls the all setup functions for the elements in the ui
+ * @code {.c++}
+ * MainWindow::setup()
+ * @endcode
+ *
  */
-// setup layout
 void MainWindow::setup()
 {
     setupDataFolder();
-    // specift root directory location (debug)
-    qDebug() << QDir::homePath() << endl;
-    // Console Text edit Setup
+    // Console Text edit Setup3
     ui->Console_textEdit->setTextInteractionFlags(Qt::NoTextInteraction);
 
     //----- Ui Function Initalization  ------//
     //
-    setCommandTree();      // -> set up command tree with builtin text file
-    setTCPConnection();    // -> set up TCP Default connection parameters
-    setupCustomPlot(ui);   // -> setup customPlot
-    setupData_tableView(); // - > setup data table view paramters
+    setCommandTree();
+    setTCPConnection();
+    setupData_tableView();
     setupProperties_tableView();
+    setupDatabase();
 
-    // console command cycle setup demo
+    // Insert Predefined commands to the command buffer
     insertElementToBuffer("sub de1.temp");
     insertElementToBuffer("sub coil0.vol");
     insertElementToBuffer("sub coil0.cur");
     insertElementToBuffer("get de1.temp");
-    insertElementToBuffer("get de2.temp");
-
-    // SQLite Database Initalization
-    setupDatabase();
+    insertElementToBuffer("get test");
 }
 
 /*
  * Layout Initalization functions
  */
-//
-// ***  Setting the TCP connection Boxes default parameters *** //
+
+/**
+ * @brief Setting up TCP connection GroupBox
+ *
+ * Sets up the TCP selection group box elements. Inserts the predefined IP and Port
+ * Adresses. Starts with ComboBox selection mode as default.
+ * @code {.c++}
+ * MainWindow::setTCPConnection()
+ * @endcode
+ *
+ */
 void MainWindow::setTCPConnection()
 {
-    // adding default adresses to the combo boxs
+    // Adding predefined IP & Port adresses to the ComboBoxes.
     ui->TCP_Select_IP_comboBox->addItem("10.58.0.81");
     ui->TCP_Select_Port_comboBox->addItem("1234");
-    ui->TCP_Select_Port_comboBox->addItem("1233");
-
     //
     ui->TCP_Select_IP_comboBox->addItem("127.0.0.1");
     ui->TCP_Select_Port_comboBox->addItem("8081");
 
-    // disabling the manual entry
+    // Disabling the manual entry lineEdits
     ui->TCP_ManualInput_IP_lineEdit->setEnabled(0);
     ui->TCP_ManualInput_IP_label->setEnabled(0);
     ui->TCP_ManualInput_Port_lineEdit->setEnabled(0);
     ui->TCP_ManualInput_Port_label->setEnabled(0);
 }
-//
+
 // *** set up command tree with initial parameters  *** //
 void MainWindow::setCommandTree()
 {
@@ -99,14 +105,28 @@ void MainWindow::setCommandTree()
     model->setHorizontalHeaderItem(0, header0);
     model->setHorizontalHeaderItem(1, header1);
     // sample Properties at start
-    items.append(new QStandardItem("get"));
-    items.append(new QStandardItem("Get the current value of Property"));
+    items.append(new QStandardItem("de1.temp"));
+    items.append(new QStandardItem("Get the current value of detector 1"));
     //
-    QStandardItem *item1 = new QStandardItem("Commands");
+    QStandardItem *item1 = new QStandardItem("Detector electronics");
+    QStandardItem *item2 = new QStandardItem("Get the current value of detector 1");
+    item1->appendRow(items);
+    items.clear();
+    items.append(new QStandardItem("de2.temp"));
+    item1->appendRow(items);
+    items.clear();
+    items.append(new QStandardItem("de3.temp"));
+    item1->appendRow(items);
+    items.clear();
+    items.append(new QStandardItem("de4.temp"));
+    item1->appendRow(items);
+    items.clear();
+    items.append(new QStandardItem("de5.temp"));
     item1->appendRow(items);
     //
     model->appendRow(item1);
-    // Forward final model to the tree view
+    // model->appendColumn(item2);
+    //  Forward final model to the tree view
     ui->Commands_treeView->setModel(model);
 }
 //
@@ -206,25 +226,27 @@ void MainWindow::onReadyRead() // triggers when byte received
      * Qt incoming data structure for change in property
      *      QBtreArray = <Time Stamp> + <Time Stamp> + <sequence number> + note +  <property> + <value>
      */
-    QByteArray rawData = socket.readAll();
-    QStringList datas = QString(rawData).split(" ");
+
+    QByteArray rawData = socket.readLine();             // reads the all available btyes in the socket
+    QStringList dataList = QString(rawData).split(" "); // splits it
     //
-    // -> Displaying the raw input on debug console text edit
+
+    displayMessageConsole(rawData, "blue"); // Displaying the raw message on console
     //
-    displayMessageConsole(rawData, "blue");
-    //
-    //
-    if (datas.size() > 4 && rawData != "Succesfully Connected to Host \r\n") // Check if
+
+    if (dataList.size() == 6) // Check if data package fits for package with property value
     {
-        handleCommand(rawData, ui);
-        addData_tableView(datas);
-        addProperties_tableView(datas[4], datas[5]);                                             // pass property and its value
-        addElementToDatabase(datas[0] + "-" + datas[1], datas[2], datas[3], datas[4], datas[5]); // add message to the database
-        //
-        for (int i = 0; i < temperaturePlots.size(); i++) // for each open widget update existing plots
+        addData_tableView(dataList);                                                                               // add message to the data table view
+        addProperties_tableView(dataList[4], dataList[5]);                                                         // pass property and its value
+        addElementToDatabase(dataList[0] + "-" + dataList[1], dataList[2], dataList[3], dataList[4], dataList[5]); // add message to the database
+
+        for (int i = 0; i < temperaturePlots.size(); i++) // for each open plotting window, update the plot values
         {
             temperaturePlots[i]->updatePlot();
         }
+    }
+    else if (dataList.size() == 4) // if package is just ack response
+    {
     }
 }
 //
@@ -493,13 +515,29 @@ void MainWindow::on_Command_Import_pushButton_clicked()
     }
 }
 
+/**
+ * Opening plotting window by double clicking.
+ *
+ *  This function opens up plotting screen if user clicked on property name.
+ * @code {.c++}
+ * MainWindow::on_Data_tableView_doubleClicked(const QModelIndex &index)
+ * @endcode
+ *
+ */
 void MainWindow::on_Data_tableView_doubleClicked(const QModelIndex &index)
 {
-    QString targetName = Data_tablewView_ItemModel->itemFromIndex(index)->text();
-    PlottingWindow *newWidget = new PlottingWindow(Data_tablewView_ItemModel, Properties_tableView_ItemModel, targetName, nullptr);
-    newWidget->show();
+    if (index.column() == 4) // Check if double clicked on property name only
+    {
+        QString targetName = Data_tablewView_ItemModel->itemFromIndex(index)->text();                                                   // Get the name of the double clicked property
+        PlottingWindow *newWidget = new PlottingWindow(Data_tablewView_ItemModel, Properties_tableView_ItemModel, targetName, nullptr); // create new plotting window using clicked property
+        newWidget->show();
 
-    temperaturePlots.append(newWidget);
+        temperaturePlots.append(newWidget);
+    }
+    else // display error message
+    {
+        displayMessageBox("Please select Property name only.", "black");
+    }
 }
 
 void MainWindow::on_Properties_tableView_doubleClicked(const QModelIndex &index)
@@ -516,18 +554,37 @@ void MainWindow::on_DataView_Clear_pushButton_clicked()
     Data_tablewView_ItemModel->clear();
 }
 
+/**
+ * Create csv file at selected location by user.
+ *
+ *  This function creates csv file from data table.
+ * @code {.c++}
+ * MainWindow::on_DataView_Export_exportConsole_pushButton_clicked()
+ * @endcode
+ *
+ */
 void MainWindow::on_DataView_Export_exportConsole_pushButton_clicked()
 {
 
-    QString filename = QFileDialog::getSaveFileName(this, tr("Save Text File"), QStandardPaths::writableLocation(QStandardPaths::DesktopLocation), tr("Text Files (*.txt)"));
-    QFile file(filename);
-    if (file.open(QIODevice::ReadWrite))
+    QString filename = QFileDialog::getSaveFileName(this, tr("Save Text File"), QStandardPaths::writableLocation(QStandardPaths::DesktopLocation));
+    QFile file(filename + ".csv");
+    if (file.open(QIODevice::WriteOnly))
     {
         QTextStream stream(&file);
 
-        for (int i = 0; i < Data_tablewView_ItemModel->rowCount(); i++)
+        stream << "<TimeStamp>"
+               << ","
+               << "<Sequence Number>"
+               << ","
+               << "<Keyword>"
+               << ","
+               << "<Property>"
+               << ","
+               << "<Value>"
+               << "\n";
+        for (int i = 1; i < Data_tablewView_ItemModel->rowCount(); i++)
         {
-            stream << Data_tablewView_ItemModel->item(i, 0)->text() << Data_tablewView_ItemModel->item(i, 1)->text() << Data_tablewView_ItemModel->item(i, 2)->text() << Data_tablewView_ItemModel->item(i, 3)->text() << Data_tablewView_ItemModel->item(i, 4)->text() << endl;
+            stream << Data_tablewView_ItemModel->item(i, 0)->text() + " " + Data_tablewView_ItemModel->item(i, 1)->text() << "," << Data_tablewView_ItemModel->item(i, 2)->text() << "," << Data_tablewView_ItemModel->item(i, 3)->text() << "," << Data_tablewView_ItemModel->item(i, 4)->text() << "," << Data_tablewView_ItemModel->item(i, 5)->text();
         }
         stream.flush();
     }
@@ -605,5 +662,28 @@ void MainWindow::setupDataFolder()
     if (!QDir("data").exists())
     {
         QDir().mkdir("data");
+    }
+}
+
+/**
+ * Function to handle signal when clicked on the properties table view
+ *
+ * @brief
+ *
+ * @param index
+ */
+void MainWindow::on_Properties_tableView_clicked(const QModelIndex &index)
+{
+    if (index.column() == 0 && index.row() > 0) // -> if selected item is in range of property column and its property name
+    {
+        ui->PropertyName_lineEdit->setText(Properties_tableView_ItemModel->itemFromIndex(index)->text()); // ->set property line edit selected property name
+    }
+}
+
+void MainWindow::on_PropertySet_pushButton_clicked()
+{
+    if (ui->PropertyValue_lineEdit->text().length() > 0)
+    {
+        sendCommand("set " + ui->PropertyName_lineEdit->text() + " " + ui->PropertyValue_lineEdit->text() + " \n");
     }
 }

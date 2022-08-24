@@ -45,8 +45,11 @@ public:
     void setupSettings();
 
     // ***  Properties list View Functions  *** //
-    void setupProperties_ListView();
+    void setupProperties_ListView();   //checks the target model and adds property to the list view
+    void updateProperties_ListView();  //updated the available properties and adds to the list view
     bool checkPropertyExistOnListView(QString property); // check property already exists on the list view
+
+
 
     // *** Properties array *** //
     // -> array used for LUT table for plotting function
@@ -60,30 +63,30 @@ public:
 private slots:
     void on_pushButton_clicked();
 
-    void on_addProperty_pushButton_clicked();
-
     void on_properties_listView_clicked(const QModelIndex &index);
 
     //  *** On Graph Control Functions  ***   //
     void contextMenuRequest(QPoint pos); // menu
     void moveLegend();                   // moving legend
 
-    void on_properties_listView_activated(const QModelIndex &index);
-
     void changeColor();
     void changeScatterStyle();
 
     void mouseMove(QMouseEvent *event);
 
+    void on_FitScreen_pushButton_clicked();
+
+    void on_refreshProperties_pushButton_clicked();
+
 private:
     Ui::PlottingWindow *ui;
 
-    QStandardItemModel *propertiesModel; // properties model for the list view for all available properties
-    QStandardItemModel *targetModel;     //  main item model
-    QStandardItemModel *mainPropertiesModel;
+    QStandardItemModel *propertiesListModel;        // properties model for the list view for all available properties
+    QStandardItemModel *targetModel;            //  main item model -> received at setup
+    QStandardItemModel *targetModelProperties;
 
     QVector<dataStruct *> array;
-    int prevIndex = 0;
+    int prevIndex = 0; //to store where program left when iterating over the main target model
     QStringList targets;
     QString targetName;
     int verticalMax = 300;

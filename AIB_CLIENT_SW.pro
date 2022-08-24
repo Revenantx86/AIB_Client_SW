@@ -30,7 +30,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
-    handleCommand.cpp \
         main.cpp \
         mainwindow.cpp \
     qcustomplot.cpp \

@@ -86,13 +86,12 @@ public:
 
 private slots:
 
-    /*
-     * Internal Methods
-     */
-    void connectTCP(QString &host, QString &Port);
-    void disconnectTCP();
-    void onReadyRead(); // Reading incoming bytes form TCP Port
-    void sendCommand(QString command);
+
+    
+    void connectTCP(QString &host, QString &Port); // connects to the given port and host ip
+    void disconnectTCP();                          // Disconnects from the host
+    void onReadyRead();                            // Reading incoming bytes form TCP Port
+    void sendCommand(QString command);             // Sends given string as command returns if succesfull
     /*
      */
 
@@ -114,6 +113,10 @@ private slots:
 
     void on_Console_Export_exportConsole_pushButton_clicked();
     void on_ShowFolder_pushButton_clicked();
+
+    void on_Properties_tableView_clicked(const QModelIndex &index);
+
+    void on_PropertySet_pushButton_clicked();
 
 private:
     //  *** Private object definitions  *** //

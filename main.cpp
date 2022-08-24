@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
     MainWindow w;
 
     // Prefereces
-    w.setWindowTitle("AIB Software Interface V1");
+    w.setWindowTitle("EGSE Client Sofware Version-2");
     w.show();
 
     return a.exec();

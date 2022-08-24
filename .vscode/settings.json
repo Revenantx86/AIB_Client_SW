@@ -1,5 +1,10 @@
 {
   "files.associations": {
-    "ios": "cpp"
+    "ios": "cpp",
+    "__tuple": "cpp",
+    "array": "cpp",
+    "string": "cpp",
+    "*.tcc": "cpp",
+    "__node_handle": "cpp"
   }
 }
