@@ -30,9 +30,10 @@ MainWindow::~MainWindow()
 }
 
 /**
- * @brief main setup function caller
+ * @brief main setup function caller.
  *
- *  This function calls the all setup functions for the elements in the ui
+ *  This function calls the all setup functions for the elements in the ui.
+ *  also sets up command cycling buffer with predefined commands
  * @code {.c++}
  * MainWindow::setup()
  * @endcode
@@ -40,13 +41,14 @@ MainWindow::~MainWindow()
  */
 void MainWindow::setup()
 {
+    // Check&create data folder
     setupDataFolder();
-    // Console Text edit Setup3
+
+    // Console Text edit Setup
     ui->Console_textEdit->setTextInteractionFlags(Qt::NoTextInteraction);
 
     //----- Ui Function Initalization  ------//
     //
-    setCommandTree();
     setTCPConnection();
     setupData_tableView();
     setupProperties_tableView();
@@ -60,9 +62,6 @@ void MainWindow::setup()
     insertElementToBuffer("get test");
 }
 
-/*
- * Layout Initalization functions
- */
 
 /**
  * @brief Setting up TCP connection GroupBox
@@ -90,47 +89,16 @@ void MainWindow::setTCPConnection()
     ui->TCP_ManualInput_Port_label->setEnabled(0);
 }
 
-// *** set up command tree with initial parameters  *** //
-void MainWindow::setCommandTree()
-{
-    // container to hold sub items
-    QList<QStandardItem *> items;
-    // Setup Header
-    QStandardItem *header0 = new QStandardItem("Command");
-    QStandardItem *header1 = new QStandardItem("Effect");
-    // create main model
-    QStandardItemModel *model = new QStandardItemModel(this);
-    model->setColumnCount(2);
-    // append header
-    model->setHorizontalHeaderItem(0, header0);
-    model->setHorizontalHeaderItem(1, header1);
-    // sample Properties at start
-    items.append(new QStandardItem("de1.temp"));
-    items.append(new QStandardItem("Get the current value of detector 1"));
-    //
-    QStandardItem *item1 = new QStandardItem("Detector electronics");
-    QStandardItem *item2 = new QStandardItem("Get the current value of detector 1");
-    item1->appendRow(items);
-    items.clear();
-    items.append(new QStandardItem("de2.temp"));
-    item1->appendRow(items);
-    items.clear();
-    items.append(new QStandardItem("de3.temp"));
-    item1->appendRow(items);
-    items.clear();
-    items.append(new QStandardItem("de4.temp"));
-    item1->appendRow(items);
-    items.clear();
-    items.append(new QStandardItem("de5.temp"));
-    item1->appendRow(items);
-    //
-    model->appendRow(item1);
-    // model->appendColumn(item2);
-    //  Forward final model to the tree view
-    ui->Commands_treeView->setModel(model);
-}
-//
-// *** Setup for data Table View  *** //
+/**
+ * @brief Setup function for table view
+ *
+ * Setup for tablew view. Sets up header name, stretch format and other initial properties.
+ *
+ * @code {.c++}
+ * MainWindow::setupData_tableView()
+ * @endcode
+ *
+ */
 void MainWindow::setupData_tableView()
 {
     //
@@ -148,7 +116,7 @@ void MainWindow::setupData_tableView()
     headerItem.append(new QStandardItem("<Message>"));
     headerItem[5]->setTextAlignment(Qt::AlignCenter);
 
-    //
+    // Append header
     Data_tablewView_ItemModel = new QStandardItemModel(this);
     Data_tablewView_ItemModel->appendRow(headerItem);
     //
@@ -156,7 +124,17 @@ void MainWindow::setupData_tableView()
     ui->Data_tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch); // adjust column width
     //
 }
-//
+
+/**
+ * @brief Setup properties table view
+ *
+ * setup functin for table view. Creates header and sets default parameters for view.
+ *
+ * @code {.c++}
+ * MainWindow::setupProperties_tableView()
+ * @endcode
+ *
+ */
 void MainWindow::setupProperties_tableView()
 {
     QList<QStandardItem *> tempHeader; // Create list of temp headers
@@ -171,12 +149,63 @@ void MainWindow::setupProperties_tableView()
     ui->Properties_tableView->setModel(Properties_tableView_ItemModel);
     ui->Properties_tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
-//  -----------      ----------------                  Custom Functions                     ----------------              ---------------- //
-/*
- * Internal Methods
+
+/**
+ *  @brief Setup function for database
+ *
+ *  Function for setting up database functionality.
+ *  Creates new database folder according to the startup time of the program.
+ *  Creates database items based on string.
+ * @code {.c++}
+ * MainWindow::setupDatabase()
+ * @endcode
+ *
  */
-//
-//*** Internal Method connecting from TCP server ***//
+void MainWindow::setupDatabase()
+{
+
+    // create default path for fb
+    QString path = QDir::currentPath() + "/data/" + QDateTime::currentDateTime().toString("MM-dd-HH:mm:ss");
+    path = path + ".db";
+    //qDebug() << path << endl;
+    db.setDatabaseName(path);
+
+    // open database
+    if (!db.open())
+    {
+        displayMessageBox("An Error occured while setting up database ! ", "black");
+        //qDebug() << "An Error occured while creating database ! " << endl;
+    }
+    // create script for table struct
+    QString setupScript = "CREATE TABLE database ("
+                          "Timestamp VARCHAR(20),"
+                          "SequenceNumber VARCHAR(20),"
+                          "Note VARCHAR(20),"
+                          "Property VARCHAR(20),"
+                          "Value VARCHAR(20) );";
+    QSqlQuery query;
+    // create table
+    if (!query.exec(setupScript))
+    {
+        displayMessageBox("An Error occured while setting up database ! ", "black");
+        //qDebug() << "An Error occured while creating database ! " << endl;
+    }
+}
+
+
+//  -----------      ----------------                  TCP Functions                     ----------------              ----------------  //
+
+/**
+ * @brief Connect to TCP target
+ *
+ * Function for connecting tcp target. host and port names are get from corresponding
+ * combo box sections.
+ *
+ * @code {.c++}
+ * MainWindow::setupProperties_tableView()
+ * @endcode
+ *
+ */
 void MainWindow::connectTCP(QString &host, QString &port)
 {
     if (!isConnected) // if not already connected
@@ -198,8 +227,18 @@ void MainWindow::connectTCP(QString &host, QString &port)
         }
     }
 }
-//
-// *** Internal Method disconnecting from TCP server *** //
+
+
+/**
+ * @brief Disconnect from TCP target
+ *
+ * Function for disconnecting from tcp target.
+ *
+ * @code {.c++}
+ * MainWindow::disconnectTCP()
+ * @endcode
+ *
+ */
 void MainWindow::disconnectTCP()
 {
     if (isConnected)
@@ -215,8 +254,18 @@ void MainWindow::disconnectTCP()
         }
     }
 }
-//
-// *** Method for reading incoming bytes from TCP Socket */
+
+/**
+ * @brief Function for reading data from TCP
+ *
+ * Function emitted when ui recieves bytes over TCP connection.
+ * Reads the bytes and converts into data package.
+ *
+ * @code {.c++}
+ * MainWindow::onReadyRead()
+ * @endcode
+ *
+ */
 void MainWindow::onReadyRead() // triggers when byte received
 {
     /*
@@ -249,8 +298,19 @@ void MainWindow::onReadyRead() // triggers when byte received
     {
     }
 }
-//
-// *** Method for sending bytes to TCP Socket ***//
+
+
+/**
+ * @brief Send commands over TCP.
+ *
+ * Sends commands over TCP connection. uses QTCP functions to send data
+ * over tcp connection.
+ *
+ * @code {.c++}
+ * MainWindow::onReadyRead()
+ * @endcode
+ *
+ */
 void MainWindow::sendCommand(QString command)
 {
     // writing on the TCP Server
@@ -271,19 +331,80 @@ void MainWindow::sendCommand(QString command)
         displayMessageBox("Not connected to any Host !", "Black");
     }
 }
-//
-// *** Adding element to the data table view ***//
+
+
+
+
+//  -----------      ----------------                  Internal Functions                     ----------------              ----------------  //
+
+/**
+ * @brief Function for adding item to database
+ *
+ *  This function called whenever new message received to system. Saves every message received on database.
+ * @code {.c++}
+ * MainWindow::addElementToDatabase(QString date, QString sequence, QString note, QString property, QString value) // adding element to the database
+ * @endcode
+ *
+ */
+void MainWindow::addElementToDatabase(QString date, QString sequence, QString note, QString property, QString value) // adding element to the database
+{
+
+    QSqlQuery query;
+
+    query.prepare("INSERT INTO database ("
+                  "Timestamp, "
+                  "SequenceNumber, "
+                  "Note, "
+                  "Property, "
+                  "Value) "
+                  "VALUES (?,?,?,?,?);");
+
+    query.addBindValue(date);
+    query.addBindValue(sequence);
+    query.addBindValue(note);
+    query.addBindValue(property);
+    query.addBindValue(value);
+
+    if (!query.exec())
+    {
+        displayMessageBox("An Error occured while adding value to database ! ", "black");
+    }
+}
+
+/**
+ * @brief Adding data to TableView
+ *
+ * Function for adding data to table view. Gets input message as string list
+ * and adds corresponding field to the table view as a new row.
+ *
+ * @code {.c++}
+ * MainWindow::addData_tableView(QStringList datas)
+ * @endcode
+ *
+ */
 void MainWindow::addData_tableView(QStringList datas)
 {
-    QList<QStandardItem *> element;
-    for (int i = 0; i < datas.size(); i++)
+    QList<QStandardItem *> element;         // create new row
+    for (int i = 0; i < datas.size(); i++)  // for each elements in datas
     {
-        element.append(new QStandardItem(datas[i]));
+        element.append(new QStandardItem(datas[i])); // add a new column to row
     }
-    Data_tablewView_ItemModel->appendRow(element);
+    Data_tablewView_ItemModel->appendRow(element); // append the new row
 }
-//
-//  *** Adding element to the properties table view ***// -> Case Sensitive !
+
+/**
+ * @brief adding properties to the table view.
+ *
+ * Function for adding properties to the properties table view.
+ * gets the property name and value to add table view.
+ *
+ * If property already exists, it updates the last value to the current new value.
+ *
+ * @code {.c++}
+ * MainWindow::addProperties_tableView(QString property, QString value)
+ * @endcode
+ *
+ */
 void MainWindow::addProperties_tableView(QString property, QString value)
 {
     if (!checkPropertyExists_tableView(property)) // if property does not exists in the table
@@ -304,11 +425,23 @@ void MainWindow::addProperties_tableView(QString property, QString value)
         }
     }
 }
-//
-// *** Checking if element exists in the properties table view  *** //
+
+/**
+ * @brief Function for checking if proprety exists on table view
+ *
+ * Internal iterative method for checking if propoerty exists
+ * at properties table view.
+ *
+ * return true if exists.
+ *
+ * @code {.c++}
+ * MainWindow::checkPropertyExists_tableView(QString item)
+ * @endcode
+ *
+ */
 bool MainWindow::checkPropertyExists_tableView(QString item)
 {
-    for (int i = 1; i < Properties_tableView_ItemModel->rowCount(); i++)
+    for (int i = 1; i < Properties_tableView_ItemModel->rowCount(); i++) //each element in properties table view
     {
         if (Properties_tableView_ItemModel->item(i, 0)->text() == item)
         {
@@ -317,11 +450,21 @@ bool MainWindow::checkPropertyExists_tableView(QString item)
     }
     return false;
 }
-//
-//  *** previous command cycle with arrow keys  *** //
+
+/**
+ * @brief Function for hadnling key press events.
+ *
+ * This function emitted whenever keypress happens.
+ * Checks if the pressed button functionality exits.
+ *
+ * @code {.c++}
+ * MainWindow::keyPressEvent(QKeyEvent *event)
+ * @endcode
+ *
+ */
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-    if (event->key() == Qt::Key_Up)
+    if (event->key() == Qt::Key_Up) //pressing key up
     {
         if (prevCommands[prevIndex].length() > 1)
         {
@@ -333,7 +476,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             }
         }
     }
-    else if (event->key() == Qt::Key_Down)
+    else if (event->key() == Qt::Key_Down) //pressing key down
     {
         if ((prevIndex) > 0)
         {
@@ -346,7 +489,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         }
     }
 
-    else if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
+    else if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) //pressing enter or return key
     {
         if (ui->Console_lineEdit->text().size() > 0)
         {
@@ -354,8 +497,18 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         }
     }
 }
-//
-//  *** check if command already exists in the buffer   ***//
+
+/**
+ * @brief Checking if command exists on command buffer
+ *
+ *  Internal method of checking if elements exists in
+ *  cycling command buffer.
+ *
+ * @code {.c++}
+ * MainWindow::checkElementExistsOnBuffer(QString item)
+ * @endcode
+ *
+ */
 bool MainWindow::checkElementExistsOnBuffer(QString item)
 {
     for (int i = 0; i < 20; i++) // iterate over commands
@@ -365,7 +518,18 @@ bool MainWindow::checkElementExistsOnBuffer(QString item)
     }
     return false;
 }
-//  *** inserts element to the previous comamnd array   *** //
+
+/**
+ * @brief Inserting item to cycling command buffer
+ *
+ *  Internal method of inserting command to the
+ *  cyclinc command buffer.
+ *
+ * @code {.c++}
+ * MainWindow::insertElementToBuffer(QString item)
+ * @endcode
+ *
+ */
 void MainWindow::insertElementToBuffer(QString item)
 {
     if (!checkElementExistsOnBuffer(item))
@@ -377,17 +541,33 @@ void MainWindow::insertElementToBuffer(QString item)
         prevCommands[0] = item;
     }
 }
-//
-/*
- * External Methods
+
+
+/**
+ * @brief Message box function
+ *
+ *  Function to display given string at external message box.
+ *
+ * @code {.c++}
+ * MainWindow::displayMessageBox(QString message, QString color)
+ * @endcode
+ *
  */
-//  *** Displays message on external message box    *** //
 void MainWindow::displayMessageBox(QString message, QString color)
 {
     QMessageBox::about(this, "Warning !", message);
 }
-//
-// *** Display given message on console with custom color   *** //
+
+/**
+ * @brief Console Display function
+ *
+ *  Function to ddisplay given message on console
+ *
+ * @code {.c++}
+ * MainWindow::displayMessageConsole(QString message, QString color)
+ * @endcode
+ *
+ */
 void MainWindow::displayMessageConsole(QString message, QString color)
 {
     ui->Console_textEdit->setTextColor(QColor(color));
@@ -396,10 +576,38 @@ void MainWindow::displayMessageConsole(QString message, QString color)
     ui->Console_textEdit->verticalScrollBar()->setValue(ui->Console_textEdit->verticalScrollBar()->maximum()); // scrolling to bottom automatically
     // ui->Console_textEdit->setTextInteractionFlags(Qt::TextSelectableByMouse); // -> enables mouse intereaction
 }
-//
+
+/**
+ * @brief Setup data folder.
+ *
+ *  Function for setup data folder. checks if data fodler exists and creates new one if dont.
+ * @code {.c++}
+ * MainWindow::setupDataFolder()
+ * @endcode
+ *
+ */
+void MainWindow::setupDataFolder()
+{
+    if (!QDir("data").exists())
+    {
+        QDir().mkdir("data");
+    }
+}
+
 //  -----------      ----------------                Ui Button Functions                     ----------------              ---------------- //
-//
-//  *** Routine for enabling and disabling between manual TCP input and combo box TCP input ***     //
+
+
+/**
+ * @brief Enabling manual TCP input
+ *
+ * Checkbox function to enable manual input for TCP connection parameters.
+ * When checked, it enables manual line edit section and disables the combo box section.
+ *
+ * @code {.c++}
+ * MainWindow::on_TCP_EnableManualInput_checkBox_stateChanged(int arg1)
+ * @endcode
+ *
+ */
 void MainWindow::on_TCP_EnableManualInput_checkBox_stateChanged(int arg1)
 {
     if (!arg1)
@@ -429,9 +637,18 @@ void MainWindow::on_TCP_EnableManualInput_checkBox_stateChanged(int arg1)
         ui->TCP_Select_Port_label->setEnabled(0);
     }
 }
-//
-//****  TCP Connect Buton ***//
-// Gets current host and IP adress and passes to the internal methods
+
+/**
+ * @brief Connect button
+ *
+ *  TCP connect button. Checks current state and gathers requierd port and
+ *  host adrres from correspoding boxes. Then calls the internal method for connecting
+ *
+ * @code {.c++}
+ *  MainWindow::on_TCP_Connect_pushButton_clicked()
+ * @endcode
+ *
+ */
 void MainWindow::on_TCP_Connect_pushButton_clicked()
 {
     if (!isConnected) // if Not connected
@@ -454,9 +671,17 @@ void MainWindow::on_TCP_Connect_pushButton_clicked()
     }
 }
 
-//****************** DEBUG CONSOLE BUTTONS ***************//
-//
-// *** Getting input from command box and writing to tcp and displaying on console   ***   //
+/**
+ * @brief Console command send button
+ *
+ * Button function for sending commands written on console text edit.
+ * It calls internal method for sending data over TCP.
+ *
+ * @code {.c++}
+ * MainWindow::on_ConsoleSend_pushButton_clicked()
+ * @endcode
+ *
+ */
 void MainWindow::on_ConsoleSend_pushButton_clicked()
 {
     if (ui->Console_lineEdit->text().size() > 0) // if there is actually input
@@ -465,14 +690,34 @@ void MainWindow::on_ConsoleSend_pushButton_clicked()
         ui->Console_lineEdit->clear(); // clear
     }
 }
-//
-//  *** Clearing the console text ***   //
+
+/**
+ * @brief Clear Console
+ *
+ * Function for cleaning all lines at console text edit.
+ *
+ * @code {.c++}
+ * MainWindow::on_Console_Clear_pushButton_clicked()
+ * @endcode
+ *
+ */
 void MainWindow::on_Console_Clear_pushButton_clicked()
 {
     ui->Console_textEdit->clear();
 }
-//
-//  *** Exporting Console as text file  *** //
+
+
+/**
+ * @brief Console Export button
+ *
+ *  Function for exporting all text written on console text edit.
+ *  Exports as .txt file format.
+ *
+ * @code {.c++}
+ * MainWindow::on_Console_Export_exportConsole_pushButton_clicked()
+ * @endcode
+ *
+ */
 void MainWindow::on_Console_Export_exportConsole_pushButton_clicked()
 {
     QString path = QFileDialog::getSaveFileName(this, tr("Select Text File "), QDir::rootPath(), "Text File (*.txt)");
@@ -489,34 +734,8 @@ void MainWindow::on_Console_Export_exportConsole_pushButton_clicked()
     }
 }
 
-void MainWindow::on_Commands_treeView_doubleClicked(const QModelIndex &index)
-{
-    ui->Console_lineEdit->setText(mainItemModel->itemFromIndex(index)->text());
-    // QStandardItemModel * temp = mainItemModel->itemFromIndex(index)->takeColumn(1);
-    // ui->Console_textEdit->insertPlainText(mainItemModel->itemFromIndex(index)->text());
-}
-
-/*
- * Importing the commands text file, selecting text file at qDialog,
- * it will automatically import to the command tree
- */
-void MainWindow::on_Command_Import_pushButton_clicked()
-{
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Select Text File "), QDir::rootPath(), "Text File (*.txt)");
-    if (fileName.length() > 0) // if text selected
-    {
-        ui->Console_textEdit->setTextColor(QColor("magenta"));
-        ui->Console_textEdit->insertPlainText("Opening text file at -> \" ");
-        ui->Console_textEdit->setTextColor(QColor("white"));
-        ui->Console_textEdit->insertPlainText(fileName);
-        ui->Console_textEdit->insertPlainText("\" \n");
-        mainItemModel = readCommandsFromFile(fileName);
-        ui->Commands_treeView->setModel(mainItemModel);
-    }
-}
-
 /**
- * Opening plotting window by double clicking.
+ * @brief Opening plotting window by double clicking.
  *
  *  This function opens up plotting screen if user clicked on property name.
  * @code {.c++}
@@ -540,22 +759,45 @@ void MainWindow::on_Data_tableView_doubleClicked(const QModelIndex &index)
     }
 }
 
+/**
+ * @brief Console Export button
+ *
+ *  Function for exporting all text written on console text edit.
+ *  Exports as .txt file format.
+ *
+ * @code {.c++}
+ * MainWindow::on_Console_Export_exportConsole_pushButton_clicked()
+ * @endcode
+ *
+ */
 void MainWindow::on_Properties_tableView_doubleClicked(const QModelIndex &index)
 {
-    QString targetName = Properties_tableView_ItemModel->itemFromIndex(index)->text();
+    QString targetName = Properties_tableView_ItemModel->itemFromIndex(index)->text(); // getting the name for table
+
     PlottingWindow *newWidget = new PlottingWindow(Data_tablewView_ItemModel, Properties_tableView_ItemModel, targetName, nullptr);
+
     newWidget->show();
 
     temperaturePlots.append(newWidget);
 }
 
+/**
+ * @brief Clear Table View Function
+ *
+ *  Function for cleaning all data on table view. It does not affect database.
+ *
+ * @code {.c++}
+ * MainWindow::on_DataView_Clear_pushButton_clicked()
+ * @endcode
+ *
+ */
 void MainWindow::on_DataView_Clear_pushButton_clicked()
 {
     Data_tablewView_ItemModel->clear();
 }
 
 /**
- * Create csv file at selected location by user.
+ * @brief Create csv file at selected location by user.
  *
  *  This function creates csv file from data table.
  * @code {.c++}
@@ -591,65 +833,14 @@ void MainWindow::on_DataView_Export_exportConsole_pushButton_clicked()
     file.close();
 }
 
-void MainWindow::setupDatabase()
-{
-
-    // create default path for fb
-    QString path = QDir::currentPath() + "/data/" + QDateTime::currentDateTime().toString("MM-dd-HH:mm:ss");
-    path = path + ".db";
-    qDebug() << path << endl;
-    db.setDatabaseName(path);
-
-    // open database
-    if (!db.open())
-    {
-        displayMessageBox("An Error occured while setting up database ! ", "black");
-        qDebug() << "An Error occured while creating database ! " << endl;
-    }
-    // create script for table struct
-    QString setupScript = "CREATE TABLE database ("
-                          "Timestamp VARCHAR(20),"
-                          "SequenceNumber VARCHAR(20),"
-                          "Note VARCHAR(20),"
-                          "Property VARCHAR(20),"
-                          "Value VARCHAR(20) );";
-    QSqlQuery query;
-    // create table
-    if (!query.exec(setupScript))
-    {
-        displayMessageBox("An Error occured while setting up database ! ", "black");
-        qDebug() << "An Error occured while creating database ! " << endl;
-    }
-}
-
-void MainWindow::addElementToDatabase(QString date, QString sequence, QString note, QString property, QString value) // adding element to the database
-{
-
-    QSqlQuery query;
-
-    query.prepare("INSERT INTO database ("
-                  "Timestamp, "
-                  "SequenceNumber, "
-                  "Note, "
-                  "Property, "
-                  "Value) "
-                  "VALUES (?,?,?,?,?);");
-
-    query.addBindValue(date);
-    query.addBindValue(sequence);
-    query.addBindValue(note);
-    query.addBindValue(property);
-    query.addBindValue(value);
-
-    if (!query.exec())
-    {
-        displayMessageBox("An Error occured while adding value to database ! ", "black");
-        qDebug() << "An Error occured while creating database ! " << endl;
-    }
-}
-
-/*
- * Reveals the folder location of database
+/**
+ * @brief Reveal folder location button.
+ *
+ * Function for revealing folder location.
+ * @code {.c++}
+ * MainWindow::on_ShowFolder_pushButton_clicked()
+ * @endcode
+ *
  */
 void MainWindow::on_ShowFolder_pushButton_clicked()
 {
@@ -657,20 +848,15 @@ void MainWindow::on_ShowFolder_pushButton_clicked()
     QDesktopServices::openUrl(QUrl::fromLocalFile(path));
 }
 
-void MainWindow::setupDataFolder()
-{
-    if (!QDir("data").exists())
-    {
-        QDir().mkdir("data");
-    }
-}
 
 /**
- * Function to handle signal when clicked on the properties table view
+ * @brief Function for properties click
  *
- * @brief
+ * function for handling input when user clicked the properties table.
+ * @code {.c++}
+ * MainWindow::on_Properties_tableView_clicked(const QModelIndex &index)
+ * @endcode
  *
- * @param index
  */
 void MainWindow::on_Properties_tableView_clicked(const QModelIndex &index)
 {
@@ -680,6 +866,18 @@ void MainWindow::on_Properties_tableView_clicked(const QModelIndex &index)
     }
 }
 
+
+/**
+ * @brief Button for property set
+ *
+ * Called when user wants to set value for clicked property value.
+ * Get the value text information and sends over send command function.
+ *
+ * @code {.c++}
+ * MainWindow::on_Properties_tableView_clicked(const QModelIndex &index)
+ * @endcode
+ *
+ */
 void MainWindow::on_PropertySet_pushButton_clicked()
 {
     if (ui->PropertyValue_lineEdit->text().length() > 0)
@@ -687,3 +885,4 @@ void MainWindow::on_PropertySet_pushButton_clicked()
         sendCommand("set " + ui->PropertyName_lineEdit->text() + " " + ui->PropertyValue_lineEdit->text() + " \n");
     }
 }
+

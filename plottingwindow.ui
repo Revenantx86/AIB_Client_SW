@@ -155,18 +155,62 @@
         <attribute name="title">
          <string>Control</string>
         </attribute>
-        <widget class="QGroupBox" name="groupBox">
+        <widget class="QWidget" name="">
          <property name="geometry">
           <rect>
-           <x>9</x>
-           <y>9</y>
-           <width>261</width>
-           <height>181</height>
+           <x>10</x>
+           <y>10</y>
+           <width>258</width>
+           <height>491</height>
           </rect>
          </property>
-         <property name="title">
-          <string>Plotting </string>
-         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QTableView" name="Properties_tableView"/>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="PropertySet_verticalLayout">
+            <item>
+             <layout class="QHBoxLayout" name="PropertySetName_horizontalLayout">
+              <item>
+               <widget class="QLabel" name="PropertyName_label">
+                <property name="text">
+                 <string>Property : </string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="PropertyName_lineEdit"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="PropertySetValue_horizontalLayout">
+              <property name="spacing">
+               <number>30</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="PropertyValue_label">
+                <property name="text">
+                 <string>Value :</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="PropertyValue_lineEdit"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QPushButton" name="PropertySet_pushButton">
+              <property name="text">
+               <string>Set Value</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </widget>
        </widget>
       </widget>

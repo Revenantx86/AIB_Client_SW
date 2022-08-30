@@ -43,8 +43,6 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void setCommandTree();
-
     /*
      * Startup Setup Functions
      */
@@ -96,9 +94,10 @@ private slots:
      */
 
     void on_ConsoleSend_pushButton_clicked();
-    void on_Commands_treeView_doubleClicked(const QModelIndex &index);
-    void on_Command_Import_pushButton_clicked();
+
+
     void on_TCP_Connect_pushButton_clicked();
+
     void on_TCP_EnableManualInput_checkBox_stateChanged(int arg1);
 
     void on_Data_tableView_doubleClicked(const QModelIndex &index);
@@ -112,6 +111,7 @@ private slots:
     void on_Console_Clear_pushButton_clicked();
 
     void on_Console_Export_exportConsole_pushButton_clicked();
+
     void on_ShowFolder_pushButton_clicked();
 
     void on_Properties_tableView_clicked(const QModelIndex &index);

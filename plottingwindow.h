@@ -45,11 +45,9 @@ public:
     void setupSettings();
 
     // ***  Properties list View Functions  *** //
-    void setupProperties_ListView();   //checks the target model and adds property to the list view
-    void updateProperties_ListView();  //updated the available properties and adds to the list view
+    void setupProperties_ListView();                     // checks the target model and adds property to the list view
+    void updateProperties_ListView();                    // updated the available properties and adds to the list view
     bool checkPropertyExistOnListView(QString property); // check property already exists on the list view
-
-
 
     // *** Properties array *** //
     // -> array used for LUT table for plotting function
@@ -81,13 +79,13 @@ private slots:
 private:
     Ui::PlottingWindow *ui;
 
-    QStandardItemModel *propertiesListModel;        // properties model for the list view for all available properties
-    QStandardItemModel *targetModel;            //  main item model -> received at setup
+    QStandardItemModel *propertiesListModel; // properties model for the list view for all available properties
+    QStandardItemModel *targetModel;         //  main item model -> received at setup
     QStandardItemModel *targetModelProperties;
 
     QVector<dataStruct *> array;
-    int prevIndex = 0; //to store where program left when iterating over the main target model
-    QStringList targets;
+    int prevIndex = 0; // to store where program left when iterating over the main target model
+
     QString targetName;
     int verticalMax = 300;
     int verticalMin = 100;
@@ -96,12 +94,8 @@ private:
     QVector<QCPScatterStyle::ScatterShape> shapes;
     QVector<QCPGraph::LineStyle> lines;
 
-
     QVariant red;
     double startTime;
-
-
 };
-
 
 #endif // TEMPERATUREPLOT_H
